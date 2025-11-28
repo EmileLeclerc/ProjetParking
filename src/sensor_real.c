@@ -7,7 +7,7 @@
 
 #define UART_PORT      UART_NUM_1
 
-int sensor_init(int TX, int RX){
+int real_sensor_init(int TX, int RX){
     esp_err_t error;
 
     uart_config_t uart_config = {
@@ -33,7 +33,7 @@ int sensor_init(int TX, int RX){
     return 1;
 }
 
-int sensor_read(uint16_t *dist){
+int real_sensor_read(uint16_t *dist){
     uint8_t data[1024];
     uint8_t frame[16];
     int frame_pos = 0;
@@ -58,3 +58,9 @@ int sensor_read(uint16_t *dist){
     }
     return 0;
 }
+
+// expose a ready-to-use interface
+sensor_interface_t SENSOR_REAL = {
+    .init = real_sensor_init,
+    .read = real_sensor_read
+};

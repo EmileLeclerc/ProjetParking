@@ -9,9 +9,11 @@
 #define USE_MOCK       0     // 1 to use mock, 0 to use real sensor
 
 #if USE_MOCK
-#include "sensor_mock.c"
+extern sensor_interface_t SENSOR_MOCK;
+#define SENSOR_IMPL  SENSOR_MOCK
 #else
-#include "sensor.c"
+extern sensor_interface_t SENSOR_REAL;
+#define SENSOR_IMPL  SENSOR_REAL
 #endif
 
 
@@ -21,8 +23,8 @@
 #define LED_PIN        8       // uses the esp's built-in led (pin 8 for esp32-c6-devkitm-1)
 #define LED_BUFFER     1000    // time that the sensor has to be stable for before the led changes state, in ms (default 10000)
 
-#define DIST_ERROR     50      // if distance lower than this, sends error (default 50)
-#define DIST_TAKEN     2000    // if distance higher than this, is free, if lower, is taken (default 2000)
+#define DIST_ERROR     100      // if distance lower than this, sends error (default 100)
+#define DIST_TAKEN     1000    // if distance higher than this (or 0), parking is free, if lower, parking is taken (default 1000)
 
 static const char *TAG = "Range Sensor";
 static led_strip_handle_t strip;
@@ -32,10 +34,10 @@ typedef enum {
     LED_STATE_FREE
 } led_state_t;
 
-int mock_sensor_read(uint16_t dist);
-
 void app_main(void) {
-    if(!sensor_init(TX_PIN, RX_PIN)){
+    sensor_interface_t sensor = SENSOR_IMPL;
+    
+    if(!sensor.init(TX_PIN, RX_PIN)){
         ESP_LOGI(TAG, "sensor init failed, stopping.");
         return;
     }
@@ -61,7 +63,7 @@ void app_main(void) {
 
     while (1) {
         led_state_t new_state = LED_STATE_ERROR;
-        if(sensor_read(&dist) == 1){
+        if(sensor.read(&dist)){
             ESP_LOGI(TAG, "Distance: %u mm", dist);
 
             if (dist <= DIST_ERROR && dist != 0){
