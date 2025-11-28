@@ -1,22 +1,19 @@
-extern "C"{
 #include <stdio.h>
 #include <string.h>
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "led_strip.h"
-#include "sensor.h"
-}
+#include "sensor_manager.h"
+#include "sensor_real.h"
+#include "sensor_mock.h"
+#include "sensor_service.h"
 
-#define USE_MOCK       1     // 1 to use mock, 0 to use real sensor
+#define USE_MOCK       1    // 1 to use mock, 0 to use real sensor
 
 #if USE_MOCK
-extern sensor_interface_t SENSOR_REAL;
-#define SENSOR_IMPL  SENSOR_REAL
-#define LED_BUFFER     10000    // time that the sensor has to be stable for before the led changes state, in ms (default 10000)
+#define LED_BUFFER     1000    // time that the sensor has to be stable for before the led changes state, in ms (default 10000)
 #else
-extern sensor_interface_t SENSOR_MOCK;
-#define SENSOR_IMPL  SENSOR_MOCK
 #define LED_BUFFER     1000    // DO NOT CHANGE, the MOCK is coded around this being 1000
 #endif
 
@@ -37,17 +34,21 @@ typedef enum {
     LED_STATE_FREE
 } led_state_t;
 
-extern "C" void app_main(void) {
-    sensor_interface_t sensor = SENSOR_IMPL;
-    
-    if(!sensor.init(TX_PIN, RX_PIN)){
-        ESP_LOGI(TAG, "sensor init failed, stopping.");
-        return;
-    }
-    else{
+extern "C" void app_main() {   
+    #if USE_MOCK
+    static MockSensorService service;
+    #else
+    static RealSensorService service;
+    #endif
+    SensorManager manager(&service);
+
+    if(manager.startSensor(TX_PIN, RX_PIN)){
         ESP_LOGI(TAG, "Reader started. Waiting for frames...");
     }
-    
+    else{
+        ESP_LOGI(TAG, "sensor init failed, stopping.");
+        return;
+    }   
     uint16_t dist = 0;
     //LED setup
     led_state_t current_state = LED_STATE_ERROR;
@@ -66,7 +67,7 @@ extern "C" void app_main(void) {
 
     while (1) {
         led_state_t new_state = LED_STATE_ERROR;
-        if(sensor.read(&dist)){
+        if(manager.getDist(&dist)){
             ESP_LOGI(TAG, "Distance: %u mm", dist);
 
             if (dist <= DIST_ERROR && dist != 0){

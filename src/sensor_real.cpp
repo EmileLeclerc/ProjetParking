@@ -1,18 +1,15 @@
-extern "C"{
-#include "sensor.h"
 #include <stdio.h>
 #include <string.h>
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
-}
-
+#include "sensor_real.h"
 
 #define UART_PORT      UART_NUM_1
 
-int real_sensor_init(int TX, int RX){
+bool RealSensorService::sensorInit(int TX, int RX)  {
     esp_err_t error;
-
+        
     uart_config_t uart_config = {
         .baud_rate = 921600,
         .data_bits = UART_DATA_8_BITS,
@@ -32,11 +29,11 @@ int real_sensor_init(int TX, int RX){
     if (error != ESP_OK) {
         return 0;
     }
-
+    
     return 1;
-}
+}   
 
-int real_sensor_read(uint16_t *dist){
+bool RealSensorService::sensorRead(uint16_t *dist) {
     uint8_t data[1024];
     uint8_t frame[16];
     int frame_pos = 0;
@@ -47,12 +44,12 @@ int real_sensor_read(uint16_t *dist){
     }
     for (int i = 0; i < len; i++) {
         uint8_t b = data[i];
-
+        
         if (frame_pos == 0 && b != 0x57) continue;
         if (frame_pos == 1 && b != 0x00) { frame_pos = 0; continue; }
-
+        
         frame[frame_pos++] = b;
-
+        
         if (frame_pos == 16) {
             *dist = frame[8] | (frame[9] << 8);
             frame_pos = 0;
@@ -61,9 +58,3 @@ int real_sensor_read(uint16_t *dist){
     }
     return 0;
 }
-
-// expose a ready-to-use interface
-sensor_interface_t SENSOR_REAL = {
-    .init = real_sensor_init,
-    .read = real_sensor_read
-};
