@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "led_strip.h": "c"
+        "led_strip.h": "c",
+        "gpio.h": "c"
     }
 }

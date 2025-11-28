@@ -9,7 +9,7 @@ int mock_sensor_init(int TX, int RX){
     return 1;
 }
 
-int mock_sensor_read(uint16_t *dist){
+int mock_sensor_read(uint16_t *dist){ //this cycles between states to make the led change colors
     vTaskDelay(pdMS_TO_TICKS(500));
     static int test_state = 0;
     test_state = (test_state + 1) % 16;

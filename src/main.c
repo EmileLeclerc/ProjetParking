@@ -9,11 +9,13 @@
 #define USE_MOCK       0     // 1 to use mock, 0 to use real sensor
 
 #if USE_MOCK
-extern sensor_interface_t SENSOR_MOCK;
-#define SENSOR_IMPL  SENSOR_MOCK
-#else
 extern sensor_interface_t SENSOR_REAL;
 #define SENSOR_IMPL  SENSOR_REAL
+#define LED_BUFFER     10000    // time that the sensor has to be stable for before the led changes state, in ms (default 10000)
+#else
+extern sensor_interface_t SENSOR_MOCK;
+#define SENSOR_IMPL  SENSOR_MOCK
+#define LED_BUFFER     1000    // DO NOT CHANGE
 #endif
 
 
@@ -21,7 +23,6 @@ extern sensor_interface_t SENSOR_REAL;
 #define RX_PIN         19      // ESP RX ← sensor TX (yellow wire)
 
 #define LED_PIN        8       // uses the esp's built-in led (pin 8 for esp32-c6-devkitm-1)
-#define LED_BUFFER     1000    // time that the sensor has to be stable for before the led changes state, in ms (default 10000)
 
 #define DIST_ERROR     100      // if distance lower than this, sends error (default 100)
 #define DIST_TAKEN     1000    // if distance higher than this (or 0), parking is free, if lower, parking is taken (default 1000)
