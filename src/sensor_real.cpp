@@ -1,9 +1,12 @@
+extern "C"{
 #include "sensor.h"
 #include <stdio.h>
 #include <string.h>
 #include "driver/uart.h"
 #include "esp_log.h"
 #include "driver/gpio.h"
+}
+
 
 #define UART_PORT      UART_NUM_1
 

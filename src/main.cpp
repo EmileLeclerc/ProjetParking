@@ -1,3 +1,4 @@
+extern "C"{
 #include <stdio.h>
 #include <string.h>
 #include "driver/uart.h"
@@ -5,8 +6,9 @@
 #include "driver/gpio.h"
 #include "led_strip.h"
 #include "sensor.h"
+}
 
-#define USE_MOCK       0     // 1 to use mock, 0 to use real sensor
+#define USE_MOCK       1     // 1 to use mock, 0 to use real sensor
 
 #if USE_MOCK
 extern sensor_interface_t SENSOR_REAL;
@@ -15,7 +17,7 @@ extern sensor_interface_t SENSOR_REAL;
 #else
 extern sensor_interface_t SENSOR_MOCK;
 #define SENSOR_IMPL  SENSOR_MOCK
-#define LED_BUFFER     1000    // DO NOT CHANGE
+#define LED_BUFFER     1000    // DO NOT CHANGE, the MOCK is coded around this being 1000
 #endif
 
 
@@ -24,7 +26,7 @@ extern sensor_interface_t SENSOR_MOCK;
 
 #define LED_PIN        8       // uses the esp's built-in led (pin 8 for esp32-c6-devkitm-1)
 
-#define DIST_ERROR     100      // if distance lower than this, sends error (default 100)
+#define DIST_ERROR     50      // if distance lower than this, sends error (default 100)
 #define DIST_TAKEN     1000    // if distance higher than this (or 0), parking is free, if lower, parking is taken (default 1000)
 
 static const char *TAG = "Range Sensor";
@@ -35,7 +37,7 @@ typedef enum {
     LED_STATE_FREE
 } led_state_t;
 
-void app_main(void) {
+extern "C" void app_main(void) {
     sensor_interface_t sensor = SENSOR_IMPL;
     
     if(!sensor.init(TX_PIN, RX_PIN)){
