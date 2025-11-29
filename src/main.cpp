@@ -1,3 +1,12 @@
+/******************************************************************************
+ *  Project : ProjetParking
+ *  File    : main.cpp
+ *  Author  : Émile Leclerc
+ *  
+ *  Description:
+ *  A simple program to change an rgb led's color based on input from a laser range sensor, mock for sensor included.
+ *  Was originally supposed to send data through zigbee, but that part failed horribly.
+ *****************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include "driver/uart.h"
@@ -12,9 +21,9 @@
 #define USE_MOCK       1    // 1 to use mock, 0 to use real sensor
 
 #if USE_MOCK
-#define LED_BUFFER     1000    // time that the sensor has to be stable for before the led changes state, in ms (default 10000)
+#define LED_BUFFER_TIME     1000    // time that the sensor has to be stable for before the led changes state, in ms (default 10000)
 #else
-#define LED_BUFFER     1000    // DO NOT CHANGE, the MOCK is coded around this being 1000
+#define LED_BUFFER_TIME     1000    // DO NOT CHANGE, the mock is coded around this being 1000
 #endif
 
 
@@ -88,7 +97,7 @@ extern "C" void app_main() {
             // If state was stable for LED_BUFFER amount of time and is different from active LED, change color and send zigbee
             if (pending_state != current_state) {
                 uint32_t now = esp_log_timestamp();
-                if (now - state_change_time >= LED_BUFFER) {
+                if (now - state_change_time >= LED_BUFFER_TIME) {
                     current_state = pending_state;
 
                     if (dist <= DIST_ERROR){
@@ -96,7 +105,7 @@ extern "C" void app_main() {
                         //send error zigbee here
                     }
                     else{
-                        ESP_LOGI(TAG, "LED changed after being stable for %d ms", LED_BUFFER);
+                        ESP_LOGI(TAG, "LED changed after being stable for %d ms", LED_BUFFER_TIME);
                         //send state change zigbee here
                     }
                 }

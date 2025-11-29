@@ -1,3 +1,16 @@
+/******************************************************************************
+ *  Project : ProjetParking
+ *  File    : sensor_mock.cpp
+ *  Author  : Émile Leclerc
+ *  
+ *  Description:
+ *  The sensor mock, init always returns correct and the read returns, for 2 seconds, in order
+ *  too close (blue)
+ *  taken (red)
+ *  returns 0, which is treated as errored (blue but changes instantly)
+ *  free (green)
+ *  then loops back to the beginning
+ *****************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include "driver/uart.h"

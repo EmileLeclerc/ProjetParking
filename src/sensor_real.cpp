@@ -1,3 +1,12 @@
+/******************************************************************************
+ *  Project : ProjetParking
+ *  File    : sensor_real.cpp
+ *  Author  : Émile Leclerc
+ *  
+ *  Description:
+ *  The real sensor, init returns 0 if an error is triggered, and pretty much always returns 1
+ *  read returns 1 if it reads correctly and 0 if it does not, the distance value gets stored in *dist
+ *****************************************************************************/
 #include <stdio.h>
 #include <string.h>
 #include "driver/uart.h"
